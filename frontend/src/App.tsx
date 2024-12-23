@@ -1,5 +1,7 @@
+import ContentUploadForm from "../components/VideoUploadForm";
+
 function App() {
-    return ;
+    return <ContentUploadForm />;
 }
 
 export default App;

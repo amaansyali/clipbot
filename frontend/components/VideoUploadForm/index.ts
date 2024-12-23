@@ -1,3 +1,3 @@
-import VideoUploadForm from "./VideoUploadForm"
+import ContentUploadForm from "./ContentUploadForm"
 
-export default VideoUploadForm
+export default ContentUploadForm
