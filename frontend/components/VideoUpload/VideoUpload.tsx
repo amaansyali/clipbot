@@ -2,8 +2,14 @@ import React, { useCallback, useState } from "react";
 
 import { useDropzone } from "react-dropzone";
 
-const VideoUpload = () => {
-    const [videoFile, setVideoFile] = useState<File | null>(null);
+interface Props {
+    onFileUpload: (file: File | null) => void;
+}
+
+let currentFilename = "";
+
+const VideoUpload = ({ onFileUpload }: Props) => {
+    const [videoInputted, setVideoInputted] = useState(false);
 
     const [dragActive, setDragActive] = useState(false);
 
@@ -21,12 +27,16 @@ const VideoUpload = () => {
 
     const handleRemove = () => {
         setDragActive(false);
-        setVideoFile(null);
+        setVideoInputted(false);
+
+        onFileUpload(null);
     };
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         acceptedFiles.forEach((file) => {
-            setVideoFile(file);
+            setVideoInputted(true);
+            currentFilename = file.name;
+            onFileUpload(file);
         });
     }, []);
 
@@ -50,7 +60,7 @@ const VideoUpload = () => {
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                 >
-                    {!videoFile ? (
+                    {!videoInputted ? (
                         <>
                             <input type="file" {...getInputProps()} />
 
@@ -71,7 +81,7 @@ const VideoUpload = () => {
                         </>
                     ) : (
                         <div className="text-center">
-                            <p className="text-gray-700">{videoFile.name}</p>
+                            <p className="text-gray-700">{currentFilename}</p>
                             <div className="text-sm/6 text-gray-600">
                                 <label className="relative cursor-pointer rounded-md font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500">
                                     <span>Remove File</span>
