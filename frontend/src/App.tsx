@@ -1,5 +1,5 @@
 function App() {
-    return <>ClipBot</>;
+    return <></>;
 }
 
 export default App;
