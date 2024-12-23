@@ -40,12 +40,14 @@ const VideoUpload = ({ onFileUpload }: Props) => {
         });
     }, []);
 
-    const { getRootProps, getInputProps } = useDropzone({
+    const { fileRejections, getRootProps, getInputProps } = useDropzone({
         onDrop,
         accept: {
             "video/*": [],
         },
     });
+
+    const fileRejectionMessage = fileRejections.map(({ errors }) => errors[0].message);
 
     return (
         <>
@@ -94,6 +96,12 @@ const VideoUpload = ({ onFileUpload }: Props) => {
                         </div>
                     )}
                 </div>
+
+                {fileRejectionMessage && (
+                <div className="pt-2 mb-4 text-sm text-red-800 rounded-lg dark:text-red-400" role="alert">
+                    {fileRejectionMessage}
+                </div>
+                )}
             </div>
         </>
     );

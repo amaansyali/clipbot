@@ -18,6 +18,4 @@ const ContentUploadForm = () => {
     )
 };
 
-
-
 export default ContentUploadForm;
