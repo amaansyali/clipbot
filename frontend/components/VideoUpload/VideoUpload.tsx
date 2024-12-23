@@ -4,11 +4,12 @@ import { useDropzone } from "react-dropzone";
 
 interface Props {
     onFileUpload: (file: File | null) => void;
+    isVideoMissing: boolean;
 }
 
 let currentFilename = "";
 
-const VideoUpload = ({ onFileUpload }: Props) => {
+const VideoUpload = ({ onFileUpload, isVideoMissing }: Props) => {
     const [videoInputted, setVideoInputted] = useState(false);
 
     const [dragActive, setDragActive] = useState(false);
@@ -47,7 +48,9 @@ const VideoUpload = ({ onFileUpload }: Props) => {
         },
     });
 
-    const fileRejectionMessage = fileRejections.map(({ errors }) => errors[0].message);
+    const fileRejectionMessage = fileRejections.map(
+        ({ errors }) => errors[0].message
+    );
 
     return (
         <>
@@ -98,9 +101,13 @@ const VideoUpload = ({ onFileUpload }: Props) => {
                 </div>
 
                 {fileRejectionMessage && (
-                <div className="pt-2 mb-4 text-sm text-red-800 rounded-lg dark:text-red-400" role="alert">
-                    {fileRejectionMessage}
-                </div>
+                    <div
+                        className="pt-2 mb-4 text-sm text-red-800 rounded-lg dark:text-red-400"
+                        role="alert"
+                    >
+                        {fileRejectionMessage}
+                        {isVideoMissing && "Post field cannot be empty"}
+                    </div>
                 )}
             </div>
         </>
