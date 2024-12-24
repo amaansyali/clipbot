@@ -1,12 +1,13 @@
+import React from "react";
+
 import SideBar from "../components/SideBar";
 import SideBarItem from "../components/SideBarItem";
 import VideoUploadForm from "../components/VideoUploadForm";
 import { NewPostIcon, AddChannelsIcon } from "../src/Icons";
 import NavBar from "../components/NavBar";
 
-import { ROUTES } from "../src/routes"
-
-export function CreatePost() {
+// TEMPORARY HOME PAGE
+export function Home() {
     return (
         <>
             <div className="flex h-screen">
@@ -15,14 +16,14 @@ export function CreatePost() {
                         <SideBarItem
                             icon={<NewPostIcon />}
                             active={true}
-                            href={ROUTES.NEW_POST}
+                            href="/#/post"
                         >
                             New Post
                         </SideBarItem>
                         <SideBarItem
                             icon={<AddChannelsIcon />}
                             active={false}
-                            href={ROUTES.ADD_CHANNELS}
+                            href="/#/addchannels"
                         >
                             Add Channels
                         </SideBarItem>

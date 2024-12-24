@@ -4,22 +4,27 @@ interface Props {
     icon: ReactNode;
     children: ReactNode;
     active: boolean;
+    href: string;
 }
 
-const SideBarItem = ({ icon, children, active }: Props) => {
+const SideBarItem = ({ icon, children, active, href }: Props) => {
     return (
         <li
-            className={`relative flex items-center py-2 px-2 rounded my-2
-        font-medium cursor-pointer
+            className={`relative rounded cursor-pointer
         ${
             active
-                ? "bg-indigo-200 text-indigo-600"
-                : "hover:bg-indigo-50 text-gray-600"
+                ? "bg-slate-800 text-light"
+                : "hover:bg-slate-800 hover:text-light text-medium-light"
         }
         `}
         >
-            {icon}
-            <span className="ml-2">{children}</span>
+            <a
+                className="flex items-center py-2 px-2 my-2 font-medium"
+                href={href}
+            >
+                {icon}
+                <span className="ml-2 text-sm">{children}</span>
+            </a>
         </li>
     );
 };

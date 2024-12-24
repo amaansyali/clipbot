@@ -17,7 +17,7 @@ type FormData = z.infer<typeof schema>;
 
 let isVideoMissing = false;
 
-const ContentUploadForm = () => {
+const VideoUploadForm = () => {
     const [videoFile, setVideoFile] = useState<File | null>(null);
 
     const handleFileUpload = (file: File | null) => {
@@ -58,19 +58,19 @@ const ContentUploadForm = () => {
                 <div className="mb-4 sm:col-span-4">
                     <label
                         htmlFor="title"
-                        className="block text-sm/6 font-medium text-gray-900"
+                        className="block text-sm/6 font-medium text-dark"
                     >
                         Title
                     </label>
                     <div className="mt-2">
                         <input
                             {...register("title")}
-                            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-dark outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-medium-light focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                         />
                     </div>
                     {errors.title && (
                         <div
-                            className="pt-2 mb-4 text-sm text-red-800 rounded-lg dark:text-red-400"
+                            className="pt-2 mb-4 text-sm text-red-dark rounded-lg dark:text-red-light"
                             role="alert"
                         >
                             {errors.title.message}
@@ -82,7 +82,7 @@ const ContentUploadForm = () => {
                 <div className="col-span-full">
                     <label
                         htmlFor="description"
-                        className="block text-sm/6 font-medium text-gray-900"
+                        className="block text-sm/6 font-medium text-dark"
                     >
                         Video Description
                     </label>
@@ -90,13 +90,13 @@ const ContentUploadForm = () => {
                         <textarea
                             {...register("description")}
                             rows={3}
-                            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-dark outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-medium focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                             defaultValue={""}
                         />
                     </div>
                     {errors.description && (
                         <div
-                            className="pt-2 mb-4 text-sm text-red-800 rounded-lg dark:text-red-400"
+                            className="pt-2 mb-4 text-sm text-red-dark rounded-lg dark:text-red-light"
                             role="alert"
                         >
                             {errors.description.message}
@@ -108,13 +108,13 @@ const ContentUploadForm = () => {
                 <div className="mt-6 flex items-center justify-end gap-x-6">
                     <button
                         type="button"
-                        className="text-sm/6 font-semibold text-gray-900"
+                        className="text-sm/6 font-semibold text-dark"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        className="rounded-md bg-primary-main px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-main"
                     >
                         Post
                     </button>
@@ -124,4 +124,4 @@ const ContentUploadForm = () => {
     );
 };
 
-export default ContentUploadForm;
+export default VideoUploadForm;

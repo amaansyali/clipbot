@@ -73,22 +73,22 @@ const VideoUpload = ({ onFileUpload, isVideoMissing }: Props) => {
                                 <div className="mt-4 flex text-sm/6 text-gray-600">
                                     <label
                                         htmlFor="file-upload"
-                                        className="relative cursor-pointer rounded-md font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                                        className="relative cursor-pointer rounded-md font-semibold text-primary-main focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-primary-hover"
                                     >
                                         <span>Upload a file</span>
                                     </label>
                                     <p className="pl-1">or drag and drop</p>
                                 </div>
-                                <p className="text-xs/5 text-gray-600">
+                                <p className="text-xs/5 text-medium-dark">
                                     MP4, MOV, AVI
                                 </p>
                             </div>
                         </>
                     ) : (
                         <div className="text-center">
-                            <p className="text-gray-700">{currentFilename}</p>
-                            <div className="text-sm/6 text-gray-600">
-                                <label className="relative cursor-pointer rounded-md font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500">
+                            <p className="text-medium-dark">{currentFilename}</p>
+                            <div className="text-sm/6 text-medium-dark">
+                                <label className="relative cursor-pointer rounded-md font-semibold text-primary-main focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-primary-hover">
                                     <span>Remove File</span>
                                     <input
                                         className="sr-only"
@@ -102,7 +102,7 @@ const VideoUpload = ({ onFileUpload, isVideoMissing }: Props) => {
 
                 {fileRejectionMessage && (
                     <div
-                        className="pt-2 mb-4 text-sm text-red-800 rounded-lg dark:text-red-400"
+                        className="pt-2 mb-4 text-sm text-red-dark rounded-lg dark:text-red-light"
                         role="alert"
                     >
                         {fileRejectionMessage}
