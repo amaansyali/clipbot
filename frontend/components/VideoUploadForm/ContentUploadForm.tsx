@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import VideoUpload from "../VideoUpload";
+import VideoUpload from "./VideoUpload";
 
 const schema = z.object({
     title: z.string().min(1, { message: "Title cannot be empty" }),
