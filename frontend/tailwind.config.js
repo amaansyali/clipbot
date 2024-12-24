@@ -11,6 +11,9 @@ export default {
             width: {
                 "sidebar": "300px"
             },
+            height: {
+                "b": "3px"
+            },
             colors: {
                 light: '#f9fafb', // text-gray-50
                 medium: {
@@ -27,7 +30,13 @@ export default {
                     light: '#f87171',
                     dark: '#991b1b',
                 },
+                slate: {
+                    dark: "#0f172a",
+                }
             },
+            translate: {
+                "1.3": '0.300rem',
+            }
         },
     },
     plugins: [],

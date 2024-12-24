@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ROUTES } from "../src/routes";
 
 export function NoPage() {
