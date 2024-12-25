@@ -6,6 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import VideoUpload from "./VideoUpload";
 
+import platforms from "../../../shared/platforms.json";
+
+import useUpload from "../../hooks/useUpload";
+
+import { Post } from "../../hooks/useUpload";
+
 const schema = z.object({
     title: z.string().min(1, { message: "Title cannot be empty" }),
     description: z.string().max(2200, {
@@ -18,24 +24,35 @@ type FormData = z.infer<typeof schema>;
 let isVideoMissing = false;
 
 const VideoUploadForm = () => {
+    const { uploadPost, isLoading, uploadError } = useUpload();
+
     const [videoFile, setVideoFile] = useState<File | null>(null);
 
     const handleFileUpload = (file: File | null) => {
         setVideoFile(file);
     };
 
-    const onSubmit = (data: FormData) => {
+    const onSubmit = async (data: FormData) => {
         if (!videoFile) {
             isVideoMissing = true;
         } else {
             reset();
             isVideoMissing = false;
 
-            // post object : { ...data, videoFile }
+            const postData: Post = {
+                title: data.title,
+                description: data.description,
+                videoFile: videoFile,
+                platforms: ["youtube", "linkedin", "instagram", "tiktok"], // will make user pick this later
+            };
+
+            try {
+                await uploadPost(postData);
+            } catch {
+                console.log("Upload failed:", uploadError);
+            }
         }
     };
-
-    // The Content Upload Form
 
     const {
         register,
@@ -48,6 +65,15 @@ const VideoUploadForm = () => {
 
     return (
         <>
+            {uploadError && (
+                <div
+                    className="pt-2 mb-4 text-sm text-red-dark rounded-lg dark:text-red-light"
+                    role="alert"
+                >
+                    {uploadError}
+                </div>
+            )}
+
             <VideoUpload
                 onFileUpload={handleFileUpload}
                 isVideoMissing={isVideoMissing}

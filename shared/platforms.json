@@ -1,0 +1,34 @@
+{
+    "YouTube": {
+        "id": "youtube",
+        "display_name": "YouTube",
+        "api_endpoint": "https://www.googleapis.com/youtube/v3",
+        "icon": "icons/youtube.png",
+        "max_file_size": 128000000,
+        "supported_formats": ["mp4", "mov", "avi"]
+    },
+        "LinkedIn": {
+        "id": "linkedin",
+        "display_name": "LinkedIn",
+        "api_endpoint": "https://api.linkedin.com/v2",
+        "icon": "icons/linkedin.png",
+        "max_file_size": 512000000,
+        "supported_formats": ["mp4", "mov"]
+    },
+        "TikTok": {
+        "id": "tiktok",
+        "display_name": "TikTok",
+        "api_endpoint": "https://open-api.tiktok.com",
+        "icon": "icons/tiktok.png",
+        "max_file_size": 100000000,
+        "supported_formats": ["mp4", "webm"]
+    },
+        "Instagram": {
+        "id": "instagram",
+        "display_name": "Instagram",
+        "api_endpoint": "https://graph.facebook.com/v12.0",
+        "icon": "icons/instagram.png",
+        "max_file_size": 150000000,
+        "supported_formats": ["mp4", "mov"]
+    }
+}

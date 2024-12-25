@@ -1,4 +1,4 @@
-import { ROUTES } from "../src/routes";
+import { ROUTES } from "../../shared/routes";
 
 export function NoPage() {
     return (

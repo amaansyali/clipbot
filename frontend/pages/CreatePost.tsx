@@ -4,7 +4,7 @@ import SideBarItem from "../components/SideBarItem";
 import VideoUploadForm from "../components/VideoUploadForm";
 import { NewPostIcon, AddChannelsIcon } from "../src/Icons";
 import NavBar from "../components/NavBar";
-import { ROUTES } from "../src/routes";
+import { ROUTES } from "../../shared/routes";
 
 export function CreatePost() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -52,8 +52,6 @@ export function CreatePost() {
                     </main>
                 </div>
             </div>
-
-
 
             {isSidebarOpen && (
                 <div

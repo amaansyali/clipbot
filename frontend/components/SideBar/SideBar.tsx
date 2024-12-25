@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-import { ROUTES } from "../../src/routes";
+import { ROUTES } from "../../../shared/routes";
 
 import BurgerMenu from "./BurgerMenu";
 
