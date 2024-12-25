@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
-
 from flask_cors import CORS
+
+import google_drive_utils
 
 app = Flask(__name__)
 CORS(app, resources={r"/upload": {"origins": "http://localhost:5173"}}) #ensures only the frontend can make Cross Origin requests
@@ -16,8 +17,7 @@ def upload_video():
         if not title or not description or not platforms or not video_file:
             return jsonify({"message": "Missing required fields"}), 400
 
-        video_path = f"./uploads/{video_file.filename}"
-        video_file.save(video_path)
+        google_drive_utils.upload(video_file)
 
         return jsonify({"message": "File uploaded successfully"}), 200
     except:
