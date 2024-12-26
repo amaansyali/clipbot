@@ -25,7 +25,7 @@ const SideBar = ({ children, onChangeSideBar, isSidebarOpen }: Props) => {
                     <a href={ROUTES.HOME}>
                         <img
                             src="../../src/assets/ClipBot_logo_variant.svg"
-                            className="h-10 cursor-pointer"
+                            className="h-10 cursor-pointer transform transition-transform duration-300 hover:scale-105"
                         />
                     </a>
                 </div>

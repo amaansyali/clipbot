@@ -63,7 +63,7 @@ export function SignUp() {
                         <a href={ROUTES.HOME}>
                             <img
                                 src="../../src/assets/ClipBot_logo.svg"
-                                className="h-12 cursor-pointer mx-auto w-auto"
+                                className="h-12 cursor-pointer mx-auto w-auto transform transition-transform duration-300 hover:scale-105"
                             />
                         </a>
                     </div>

@@ -26,7 +26,7 @@ const NavBar = () => {
                         {/* Profile Dropdown */}
                         <Menu as="div" className="relative ml-3">
                             <div>
-                                <MenuButton className="relative flex rounded-full bg-dark text-sm transform transition-transform duration-300 hover:scale-110">
+                                <MenuButton className="relative flex rounded-full bg-white text-sm transform transition-transform duration-300 hover:scale-110">
                                     <span className="sr-only">
                                         Open user menu
                                     </span>
@@ -66,12 +66,12 @@ const NavBar = () => {
                         </Menu>
                     </div>
                 ) : (
-                    <div className="flex h-16 items-center justify-between">
+                    <div className="flex items-center justify-between">
                         <div className="p-4">
                             <a href={ROUTES.HOME}>
                                 <img
                                     src="../../src/assets/ClipBot_logo.svg"
-                                    className="h-10 cursor-pointer"
+                                    className="h-10 cursor-pointer transform transition-transform duration-300 hover:scale-105"
                                 />
                             </a>
                         </div>
