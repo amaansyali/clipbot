@@ -59,5 +59,43 @@ def upload_to_google_drive():
     except:
         return jsonify({"message": "Server error"}), 500
 
+@app.route('/login', methods=['POST'])
+def login_user():
+    try:
+        login_info = {
+            "email" : request.form.get("email"),
+            "password" : request.form.get("password")
+        }
+
+        if not login_info["email"] or not login_info["email"]:
+            return jsonify({"message": "Missing required fields"}), 400
+
+        print(login_info["email"])
+        print(login_info["password"])
+
+        return jsonify({"message": "User logged in succesfully"}), 200
+    except:
+        return jsonify({"message": "Server error"}), 500
+
+@app.route('/signup', methods=['POST'])
+def sign_up_user():
+    try:
+        login_info = {
+            "email" : request.form.get("email"),
+            "password" : request.form.get("password")
+        }
+
+        if not login_info["email"] or not login_info["email"]:
+            return jsonify({"message": "Missing required fields"}), 400
+
+        print(login_info["email"])
+        print(login_info["password"])
+
+        return jsonify({"message": "User logged in succesfully"}), 200
+    except:
+        return jsonify({"message": "Server error"}), 500
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)

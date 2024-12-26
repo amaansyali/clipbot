@@ -1,57 +1,71 @@
 import { Home } from "../pages/Home";
+import { Dashboard } from "../pages/Dashboard";
 import { CreatePost } from "../pages/CreatePost";
 import { AddChannels } from "../pages/AddChannels";
+import { Login } from "../pages/Login";
+import { SignUp } from "../pages/SignUp";
 import { NoPage } from "../pages/NoPage";
 
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ReactNode, useState } from "react";
+import { HashRouter, Routes, Route } from "react-router-dom";
+
+import { AuthProvider } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
+
+import { ProtectedRoute, PublicRoute } from "./routes/Routes";
+
+const DefaultRoute = () => {
+    const { isLoggedIn } = useAuth();
+
+    return isLoggedIn ? <Dashboard /> : <Home />;
+};
 
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
-
     return (
-        <HashRouter>
-            <Routes>
-                <Route path="*" element={<NoPage />} />
-                <Route path="/" element={<Home />} />
+        <AuthProvider>
+            <HashRouter>
+                <Routes>
+                    <Route path="*" element={<NoPage />} />
 
-                <Route
-                    path="/post"
-                    element={
-                        <ProtectedRoute isLoggedIn={isLoggedIn}>
-                            <CreatePost />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/addchannels"
-                    element={
-                        <ProtectedRoute isLoggedIn={isLoggedIn}>
-                            <AddChannels />
-                        </ProtectedRoute>
-                    }
-                />
-            </Routes>
-        </HashRouter>
+                    <Route path="/" element={<DefaultRoute />} />
+
+                    <Route
+                        path="/post"
+                        element={
+                            <ProtectedRoute>
+                                <CreatePost />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/addchannels"
+                        element={
+                            <ProtectedRoute>
+                                <AddChannels />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/login"
+                        element={
+                            <PublicRoute>
+                                <Login />
+                            </PublicRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/signup"
+                        element={
+                            <PublicRoute>
+                                <SignUp />
+                            </PublicRoute>
+                        }
+                    />
+                </Routes>
+            </HashRouter>
+        </AuthProvider>
     );
 }
-
-interface ProtectedRouteProps {
-    isLoggedIn: boolean;
-    children: ReactNode;
-}
-
-// Protected Route Component
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-    isLoggedIn,
-    children,
-}) => {
-    if (!isLoggedIn) {
-        // Redirect to Home or Login if not logged in
-        return <Navigate to="/" replace />;
-    }
-
-    return children;
-};
 
 export default App;

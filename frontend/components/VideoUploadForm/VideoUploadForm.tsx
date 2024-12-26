@@ -1,13 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import VideoUpload from "./VideoUpload";
-
-import platforms from "../../../shared/platforms.json";
-
 import useUpload from "../../hooks/useUpload";
 
 import { Post } from "../../hooks/useUpload";
