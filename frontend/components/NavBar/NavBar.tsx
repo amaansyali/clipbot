@@ -77,13 +77,13 @@ const NavBar = () => {
                         </div>
                         <div>
                             <a
-                                href="/#/login"
+                                href={ROUTES.LOGIN}
                                 className="rounded-md bg-primary-main px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-main"
                             >
                                 Log In
                             </a>
                             <a
-                                href="/#/signup"
+                                href={ROUTES.SIGNUP}
                                 className="rounded-md ml-4 bg-primary-main px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-main"
                             >
                                 Sign Up

@@ -12,7 +12,7 @@ export function NoPage() {
                         Page not found
                     </h1>
                     <p className="mt-6 text-pretty text-lg font-medium text-medium-dark sm:text-xl/8">
-                        Sorry, we couldn’t find the page you’re looking for.
+                        Sorry, we couldn't find the page you're looking for.
                     </p>
                     <div className="mt-10 flex items-center justify-center gap-x-6">
                         <a

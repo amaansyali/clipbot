@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import useSignUp, { SignUpData } from "../hooks/useSignUp";
+import { ROUTES } from "../../shared/routes";
 
 const schema = z.object({
     email: z.string().email({ message: "Please enter a valid email address" }),
@@ -58,11 +59,14 @@ export function SignUp() {
         <>
             <div className="flex min-h-full my-20 flex-1 flex-col justify-center px-6 py-12 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                    <img
-                        alt="Your Company"
-                        src="../src/assets/Clipbot_logo.svg"
-                        className="mx-auto h-10 w-auto"
-                    />
+                    <div>
+                        <a href={ROUTES.HOME}>
+                            <img
+                                src="../../src/assets/ClipBot_logo.svg"
+                                className="h-12 cursor-pointer mx-auto w-auto"
+                            />
+                        </a>
+                    </div>
                     <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-dark">
                         Sign up here
                     </h2>
@@ -157,7 +161,7 @@ export function SignUp() {
                     <p className="mt-10 text-center text-sm/6 text-medium-light">
                         Already have an account?{" "}
                         <a
-                            href="/#/login"
+                            href={ROUTES.LOGIN}
                             className="font-semibold text-primary-main hover:text-primary-hover"
                         >
                             Log In here
