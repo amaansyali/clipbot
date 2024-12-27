@@ -25,8 +25,14 @@ const useSignUp = () => {
 
         } catch (err: any) {
             if (err instanceof CanceledError) return;
-            console.log(err)
-            setSignUpError(err.message)
+            console.log(err.response)
+            if (err.response) {
+                console.log(err.response.data.message)
+                setSignUpError(err.response.data.message)
+            } else {
+                console.log(err.message)
+                setSignUpError(err.message)
+            }
         } finally {
             setLoading(false)
         }

@@ -25,8 +25,14 @@ const useLogin = () => {
 
         } catch (err: any) {
             if (err instanceof CanceledError) return;
-            console.log(err)
-            setLoginError(err.message)
+
+            if (err.response) {
+                console.log(err.response.data.message)
+                setLoginError(err.response.data.message)
+            } else {
+                console.log(err.message)
+                setLoginError(err.message)
+            }
         } finally {
             setLoading(false)
         }

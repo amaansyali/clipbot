@@ -6,7 +6,7 @@ import useSignUp, { SignUpData } from "../hooks/useSignUp";
 import { ROUTES } from "../../shared/routes";
 
 const schema = z.object({
-    email: z.string().email({ message: "Please enter a valid email address" }),
+    email: z.string().max(320, "Email length cannot exceed 320 characters").email({ message: "Please enter a valid email address" }),
 
     // Password Validation
     password: z
