@@ -7,8 +7,19 @@ import { useAuth } from "../../context/AuthContext";
 import { ROUTES } from "../../../shared/routes";
 
 const NavBar = () => {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, setIsLoggedIn } = useAuth();
     console.log(isLoggedIn);
+
+    const  signOut = () => {
+        try {
+            localStorage.removeItem('authToken');
+            setIsLoggedIn(false)
+
+        } catch (error) {
+            console.error('Error during sign out:', error);
+        }
+    }
+
     return (
         <nav className="bg-white drop-shadow-md">
             <div className="mx-auto max-w-8xl px-2 sm:px-6 lg:px-8">
@@ -56,7 +67,7 @@ const NavBar = () => {
                                 </MenuItem>
                                 <MenuItem>
                                     <a
-                                        href="#"
+                                        onClick={signOut}
                                         className="block px-4 py-2 text-sm text-medium-dark hover:bg-light transition-colors duration-150"
                                     >
                                         Sign out
