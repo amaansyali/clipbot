@@ -1,3 +1,5 @@
+import { HashRouter, Routes, Route } from "react-router-dom";
+
 import { Home } from "../pages/Home";
 import { Dashboard } from "../pages/Dashboard";
 import { CreatePost } from "../pages/CreatePost";
@@ -5,8 +7,6 @@ import { AddChannels } from "../pages/AddChannels";
 import { Login } from "../pages/Login";
 import { SignUp } from "../pages/SignUp";
 import { NoPage } from "../pages/NoPage";
-
-import { HashRouter, Routes, Route } from "react-router-dom";
 
 import { AuthProvider } from "../context/AuthContext";
 import { useAuth } from "../context/AuthContext";

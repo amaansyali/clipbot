@@ -1,11 +1,11 @@
+import React, { useState } from "react";
+
 import SideBar from "../components/SideBar";
 import SideBarItem from "../components/SideBarItem";
-import { NewPostIcon, AddChannelsIcon } from "../src/Icons";
-
-import { ROUTES } from "../../shared/routes";
-
 import NavBar from "../components/NavBar";
-import { useState } from "react";
+
+import { NewPostIcon, AddChannelsIcon } from "../src/Icons";
+import { ROUTES } from "../../shared/routes";
 
 export function AddChannels() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);

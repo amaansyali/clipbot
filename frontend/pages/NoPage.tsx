@@ -1,3 +1,4 @@
+import React from "react"
 import { ROUTES } from "../../shared/routes";
 
 export function NoPage() {

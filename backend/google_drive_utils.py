@@ -1,12 +1,9 @@
 import os
+
 from dotenv import load_dotenv
-
-from googleapiclient.http import MediaIoBaseUpload
-from googleapiclient.discovery import build
 from google.oauth2 import service_account
-
-import io
-
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload
 from googleapiclient.errors import HttpError
 
 #load the service account

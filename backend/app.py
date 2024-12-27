@@ -1,18 +1,16 @@
-from datetime import datetime, timedelta, timezone
 import io
 import json
 import os
+from datetime import datetime, timedelta, timezone
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-
-# tokens and encryption
 import bcrypt
 import jwt
+from sqlalchemy.exc import ProgrammingError
 
 import google_drive_utils
 from models import db, User, RefreshToken
-
-from sqlalchemy.exc import ProgrammingError
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}) #ensures only the frontend can make Cross Origin requests

@@ -1,9 +1,11 @@
-import { useState } from "react";
+import React, { useState } from "react";
+
 import SideBar from "../components/SideBar";
 import SideBarItem from "../components/SideBarItem";
 import VideoUploadForm from "../components/VideoUploadForm";
-import { NewPostIcon, AddChannelsIcon } from "../src/Icons";
 import NavBar from "../components/NavBar";
+
+import { NewPostIcon, AddChannelsIcon } from "../src/Icons";
 import { ROUTES } from "../../shared/routes";
 
 export function CreatePost() {
