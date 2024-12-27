@@ -134,7 +134,7 @@ def folders_into_name_to_id(folders):
 
     return name_to_id_dict
 
-def create_folder(folder_name, parent_folder_id=None):
+def create_folder(folder_name, parent_folder_id=PARENT_FOLDER_ID):
     try:
         creds = authenticate()
         service = build("drive", "v3", credentials=creds)
@@ -169,5 +169,28 @@ def delete_file(file_id):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def delete_everything():
+    # DOOMSDAY FUNCTION
+    try:
+        service = get_service()
+
+        results = service.files().list(pageSize=1000, fields="files(id, name)").execute()
+        files = results.get('files', [])
+
+        if not files:
+            print("No files found.")
+            return
+
+        for file in files:
+            file_id = file['id']
+            file_name = file['name']
+            print(f"Deleting {file_name} (ID: {file_id})")
+            service.files().delete(fileId=file_id).execute()
+
+        print("All files deleted successfully.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 if __name__ == "__main__":
+    # delete_everything()
     pass

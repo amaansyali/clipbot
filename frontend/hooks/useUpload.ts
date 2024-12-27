@@ -7,6 +7,7 @@ export interface Post {
     description: string;
     videoFile: File;
     platforms: string[];
+    token: string | null;
 }
 
 const useUpload = () => {
@@ -23,9 +24,15 @@ const useUpload = () => {
             formData.append("videoFile", postData.videoFile)
             formData.append("platforms", JSON.stringify(postData.platforms))
 
-            setLoading(true)
-            await apiClient.post("/upload", formData, {});
+            const token = postData.token
 
+            setLoading(true)
+            await apiClient.post("/upload", formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Bearer indicates the type of token being used
+                    "Content-Type": "multipart/form-data"
+                }
+            });
 
         } catch (err: any) {
             if (err instanceof CanceledError) return;

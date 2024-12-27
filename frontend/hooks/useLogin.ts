@@ -1,6 +1,7 @@
 import { useState } from "react";
 import apiClient from "../services/api-client";
 import { CanceledError } from "axios";
+import { useAuth } from "../context/AuthContext";
 
 export interface LoginInfo {
     email: string;
@@ -8,6 +9,8 @@ export interface LoginInfo {
 }
 
 const useLogin = () => {
+
+    const { setIsLoggedIn } = useAuth()
 
     const [loginError, setLoginError] = useState< string | null>(null);
     const [isLoading, setLoading] = useState(false)
@@ -20,9 +23,12 @@ const useLogin = () => {
             formData.append("password", loginInfo.password)
 
             setLoading(true)
-            await apiClient.post("/login", formData, {});
+            const response = await apiClient.post("/login", formData, {});
+            const token = response.data.token
 
+            localStorage.setItem("authToken", token);
 
+            setIsLoggedIn(true)
         } catch (err: any) {
             if (err instanceof CanceledError) return;
 

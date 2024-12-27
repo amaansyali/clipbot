@@ -1,3 +1,5 @@
+import React from "react"
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -5,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import useLogin from "../hooks/useLogin";
 import { LoginInfo } from "../hooks/useLogin";
 import { ROUTES } from "../../shared/routes";
+import { useAuth } from "../context/AuthContext";
 
 const schema = z.object({
     email: z.string().email({ message: "Please enter a valid email address" }),
@@ -15,6 +18,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function Login() {
+
     const { loginUser, isLoading, loginError } = useLogin();
 
     const onSubmit = async (data: FormData) => {
@@ -26,6 +30,7 @@ export function Login() {
         };
         try {
             await loginUser(loginInfo);
+
         } catch {
             console.log("Login failed:", loginError);
         }

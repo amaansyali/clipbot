@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -36,11 +36,14 @@ const VideoUploadForm = () => {
             reset();
             isVideoMissing = false;
 
+            const token = localStorage.getItem("authToken");
+
             const postData: Post = {
                 title: data.title,
                 description: data.description,
                 videoFile: videoFile,
                 platforms: ["youtube", "linkedin", "instagram", "tiktok"], // will make user pick this later
+                token: token,
             };
 
             try {
