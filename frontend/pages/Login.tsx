@@ -110,6 +110,7 @@ export function Login() {
                                 <input
                                     {...register("password")}
                                     required
+                                    type="password"
                                     autoComplete="current-password"
                                     className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-dark outline outline-1 -outline-offset-1 outline-medium-light placeholder:text-medium-light focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary-main sm:text-sm/6"
                                 />

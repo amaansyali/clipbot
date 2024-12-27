@@ -4,6 +4,8 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
+import bcrypt
+
 import google_drive_utils
 from models import db, User, RefreshToken
 
@@ -89,7 +91,7 @@ def login_user():
         if not user:
             return jsonify({"message": "Invalid email or password"}), 400
 
-        if not password == user.password:
+        if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
             return jsonify({"message": "Invalid email or password"}), 400
 
         return jsonify({"message": "User logged in succesfully"}), 200
@@ -112,12 +114,15 @@ def sign_up_user():
         if existing_user:
             return jsonify({"message": "Email already in use"}), 400
 
-        new_user = User(email=email, password=password)
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        new_user = User(email=email, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 
         return jsonify({"message": "User signed up succesfully"}), 200
     except:
+        db.session.rollback()
         return jsonify({"message": "Server error"}), 500
 
 if __name__ == "__main__":
