@@ -7,32 +7,29 @@ import { AddChannels } from "../pages/AddChannels";
 import { Login } from "../pages/Login";
 import { SignUp } from "../pages/SignUp";
 import { NoPage } from "../pages/NoPage";
-
-import { useAuth } from "../context/AuthContext";
-
-import { ProtectedRoute, PublicRoute } from "./routes/Routes";
 import { AddChannelSuccess } from "../pages/AddChannelSuccess";
 import { AddChannelError } from "../pages/AddChannelError";
 
-interface Props {
-    isLoggedIn: boolean
-}
+import { AuthProvider } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
-const DefaultRoute = ( { isLoggedIn } : Props ) => {
+import { ProtectedRoute, PublicRoute } from "./routes/Routes";
+import { ROUTES } from "../../shared/routes";
+
+const DefaultRoute = () => {
+    const { isLoggedIn } = useAuth();
 
     return isLoggedIn ? <Dashboard /> : <Home />;
 };
 
 function App() {
-    const { isLoggedIn } = useAuth();
-
     return (
-
+        <AuthProvider>
             <HashRouter>
                 <Routes>
                     <Route path="*" element={<NoPage />} />
 
-                    <Route path="/" element={<DefaultRoute isLoggedIn={isLoggedIn}/>} />
+                    <Route path="/" element={<DefaultRoute />} />
 
                     <Route
                         path="/post"
@@ -88,6 +85,7 @@ function App() {
                     />
                 </Routes>
             </HashRouter>
+        </AuthProvider>
     );
 }
 

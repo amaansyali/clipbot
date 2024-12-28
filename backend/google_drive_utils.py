@@ -1,3 +1,5 @@
+import io
+import json
 import os
 
 from dotenv import load_dotenv
@@ -19,6 +21,9 @@ if not PARENT_FOLDER_ID:
     raise ValueError("PARENT_FOLDER_ID error")
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
+
+MEDIA_FOLDER_NAME = os.getenv("MEDIA_FOLDER_NAME")
+METADATA_FOLDER_NAME = os.getenv("METADATA_FOLDER_NAME")
 
 def authenticate():
     creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
@@ -187,6 +192,34 @@ def delete_everything():
         print("All files deleted successfully.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+def save_files_on_drive(title, description, platforms, video_file, user_email, user_folder_id):
+
+    #UPLOAD TO MEDIA
+    parent = user_folder_id
+    folders = get_folders_in_parent(parent)
+
+    name_to_id = folders_into_name_to_id(folders) # create name to id dictionary
+
+    number_of_past_uploads = get_folder_length(name_to_id[MEDIA_FOLDER_NAME])
+    current_upload_count = str(number_of_past_uploads + 1)
+
+    new_media_folder_id = create_folder(current_upload_count, name_to_id[MEDIA_FOLDER_NAME])
+
+    upload(video_file, "application/octet-stream", current_upload_count, new_media_folder_id)
+
+    #UPLOAD TO METADATA
+    data = {
+        "title": title,
+        "description": description,
+        "platforms": platforms,
+        "email": user_email # not really neccessary
+    }
+    json_data = json.dumps(data, indent=4)
+
+    file_object = io.BytesIO(json_data.encode("utf-8"))
+
+    upload(file_object, "application/json", current_upload_count, name_to_id[METADATA_FOLDER_NAME])
 
 if __name__ == "__main__":
     # delete_everything()

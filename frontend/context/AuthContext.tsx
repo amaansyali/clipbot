@@ -12,7 +12,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children } : AuthProviderProps) => {
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true); // DEFAULT LOGIN STATE
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // DEFAULT LOGIN STATE
 
     return (
         <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>

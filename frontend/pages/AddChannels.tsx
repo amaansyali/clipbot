@@ -6,6 +6,7 @@ import NavBar from "../components/NavBar";
 
 import { NewPostIcon, AddChannelsIcon } from "../src/Icons";
 import { ROUTES } from "../../shared/routes";
+import apiClient from "../services/api-client";
 
 interface ConnectedAccounts {
     youtube: string[];
@@ -14,7 +15,7 @@ interface ConnectedAccounts {
     tiktok: string[];
 }
 
-export function AddChannels(): JSX.Element {
+export function AddChannels() {
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
     // Dumy data for appearance
@@ -53,6 +54,12 @@ export function AddChannels(): JSX.Element {
                 ))}
             </div>
         );
+    };
+
+    const handleAddYoutube = async () => {
+        document.cookie = `token=${localStorage.getItem("authToken")}; Path=/`;
+        window.location.href = "http://localhost:5000/auth/youtube/login";
+
     };
 
     const handleDisconnectAccount = (
@@ -106,7 +113,10 @@ export function AddChannels(): JSX.Element {
                         </header>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-8xl px-4 sm:px-6 lg:px-8">
                             <div>
-                                <button className="flex items-center justify-center w-full bg-red-600 font-semibold text-white py-3 px-4 rounded-lg hover:bg-red-700 transition duration-200">
+                                <button
+                                    className="flex items-center justify-center w-full bg-red-600 font-semibold text-white py-3 px-4 rounded-lg hover:bg-red-700 transition duration-200"
+                                    onClick={handleAddYoutube}
+                                >
                                     <img
                                         src="../src/assets/youtube_logo.png"
                                         alt="YouTube"
