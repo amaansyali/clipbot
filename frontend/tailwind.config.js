@@ -16,6 +16,7 @@ export default {
             },
             colors: {
                 light: '#f9fafb', // text-gray-50
+                lighter: '#f3f4f6',
                 medium: {
                     light: '#9ca3af', // text-gray-400
                     dark: '#4b5563', // text-gray-400
