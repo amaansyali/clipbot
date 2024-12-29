@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
 import SideBar from "../components/SideBar";
 import SideBarItem from "../components/SideBarItem";
 import NavBar from "../components/NavBar";
@@ -8,40 +7,113 @@ import { NewPostIcon, AddChannelsIcon } from "../src/Icons";
 import { ROUTES } from "../../shared/routes";
 import apiClient from "../services/api-client";
 
-interface ConnectedAccounts {
-    youtube: string[];
-    linkedin: string[];
-    instagram: string[];
-    tiktok: string[];
+interface Channel {
+    channel_name: string;
+    channel_id: string;
+}
+
+interface ConnectedChannels {
+    youtube: Channel[];
+    linkedin: Channel[];
+    instagram: Channel[];
+    tiktok: Channel[];
 }
 
 export function AddChannels() {
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+    const [channels, setChannels] = useState<ConnectedChannels | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [fetchChannelsError, setFetchChannelsError] = useState<string | null>(
+        null
+    );
 
-    // Dumy data for appearance
-    const connectedAccounts: ConnectedAccounts = {
-        youtube: ["My YouTube Channel 1", "My YouTube Channel 2"],
-        linkedin: ["My LinkedIn Profile"],
-        instagram: ["My Instagram Account"],
-        tiktok: ["My TikTok Account 1", "My TikTok Account 2"],
-    };
+    useEffect(() => {
+        const fetchChannels = async () => {
+            try {
+                setIsLoading(true);
+                const response = await apiClient.get("/fetchchannels");
+                console.log(response.data.channels);
+                setChannels(response.data.channels);
+            } catch (error) {
+                console.error("Error fetching channels:", error);
+                setFetchChannelsError("Failed to fetch channels");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchChannels();
+    }, []);
 
     const handleChangeSideBar = (): void => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    const renderConnectedAccounts = (
-        platform: keyof ConnectedAccounts
-    ): JSX.Element => {
-        const accounts = connectedAccounts[platform] || [];
+    const handleAddYoutube = async () => {
+        window.location.href = "http://localhost:5000/auth/youtube/login";
+    };
+
+    const handleDisconnectAccount = async (
+        platform: keyof ConnectedChannels,
+        account: Channel
+    ) => {
+        console.log(`Disconnecting ${account.channel_name} from ${platform}`);
+        console.log(`/${platform}/disconnect`);
+        try {
+            const response = await apiClient.post(
+                `/${platform}/disconnect`,
+                { channel_id: account.channel_id },
+                { withCredentials: true }
+            );
+
+            if (response.status === 200) {
+                console.log(
+                    `${account.channel_name} successfully disconnected from ${platform}`
+                );
+                window.location.reload();
+            } else {
+                console.error(
+                    `Failed to disconnect ${account.channel_name} from ${platform}`
+                );
+            }
+        } catch (error) {
+            console.error(
+                `Error disconnecting ${account.channel_name} from ${platform}:`,
+                error
+            );
+        }
+    };
+
+    const RenderConnectedAccounts = ({
+        platform,
+        channels,
+    }: {
+        platform: keyof ConnectedChannels;
+        channels: ConnectedChannels | null;
+    }) => {
+        if (isLoading) return <span className="font-medium text-xs text-dark">Loading...</span>;
+        if (fetchChannelsError) return <span className="font-medium text-xs text-red-main">Error: {fetchChannelsError}</span>;
+        if (
+            !channels ||
+            !channels[platform] ||
+            channels[platform].length === 0
+        ) {
+            return (
+                <span className="font-medium text-xs text-dark">
+                    No connected accounts for {platform}.
+                </span>
+            );
+        }
         return (
             <div className="mt-4 space-y-2">
-                {accounts.map((account, index) => (
+                {channels[platform].map((account, index) => (
                     <div
                         key={index}
                         className="flex items-center justify-between bg-lighter p-3 rounded-lg shadow-sm"
                     >
-                        <span className="text-dark font-medium">{account}</span>
+                        <span className="text-dark font-medium">
+                            {account.channel_name}
+                        </span>
                         <button
                             className="text-red-light font-semibold hover:text-red-dark transition"
                             onClick={() =>
@@ -54,17 +126,6 @@ export function AddChannels() {
                 ))}
             </div>
         );
-    };
-
-    const handleAddYoutube = async () => {
-        window.location.href = "http://localhost:5000/auth/youtube/login";
-    };
-
-    const handleDisconnectAccount = (
-        platform: keyof ConnectedAccounts,
-        account: string
-    ): void => {
-        console.log(`Disconnecting ${account} from ${platform}`);
     };
 
     return (
@@ -122,7 +183,10 @@ export function AddChannels() {
                                     />
                                     Add YouTube
                                 </button>
-                                {renderConnectedAccounts("youtube")}
+                                <RenderConnectedAccounts
+                                    platform="youtube"
+                                    channels={channels}
+                                />
                             </div>
 
                             <div>
@@ -134,7 +198,10 @@ export function AddChannels() {
                                     />
                                     Add LinkedIn
                                 </button>
-                                {renderConnectedAccounts("linkedin")}
+                                <RenderConnectedAccounts
+                                    platform="linkedin"
+                                    channels={channels}
+                                />
                             </div>
 
                             <div>
@@ -146,7 +213,10 @@ export function AddChannels() {
                                     />
                                     Add Instagram
                                 </button>
-                                {renderConnectedAccounts("instagram")}
+                                <RenderConnectedAccounts
+                                    platform="instagram"
+                                    channels={channels}
+                                />
                             </div>
 
                             <div>
@@ -158,7 +228,10 @@ export function AddChannels() {
                                     />
                                     Add TikTok
                                 </button>
-                                {renderConnectedAccounts("tiktok")}
+                                <RenderConnectedAccounts
+                                    platform="tiktok"
+                                    channels={channels}
+                                />
                             </div>
                         </div>
                     </main>

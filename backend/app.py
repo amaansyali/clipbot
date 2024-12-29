@@ -15,6 +15,8 @@ from models import db, User, Channel
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 
+from youtube_routes import youtube_blueprint
+
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:5173"}}) #ensures only the frontend can make Cross Origin requests
 
@@ -41,6 +43,9 @@ with app.app_context():
         print("Database tables created successfully.")
     except Exception as e:
         print(f"Error creating database tables: {e}")
+
+#Register blueprints
+app.register_blueprint(youtube_blueprint)
 
 # ACCESS AND REFRESH TOKENS
 ACCESS_TOKEN_EXPIRES_MINUTES = 15
@@ -72,9 +77,7 @@ def generate_access_and_refresh_response(user_id, user_folder_id):
 
 @app.route('/auth/validate', methods=['POST'])
 def validate_token():
-
-    access_token = request.cookies.get('access_token')
-    print(access_token)
+    access_token = request.cookies.get("access_token")
 
     if not access_token:
         return jsonify({"isValid": False}), 401
@@ -141,6 +144,7 @@ def upload():
 
 @app.route("/login", methods=["POST"])
 def login_user():
+
     try:
         email = request.form.get("email")
         password = request.form.get("password")
@@ -208,109 +212,91 @@ def logout():
     return response
 
 
+@app.route("/fetchchannels", methods=["GET"])
+def fetch_channels():
+    access_token = request.cookies.get("access_token")
 
-
-
-
-
-
-
-
-
-
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1" # REMOVE THIS !!!!! THIS ALLOWS OAUTH@ TO USE HTTP
-
-CLIENT_ID = os.getenv("YOUTUBE_CLIENT_ID")
-CLIENT_SECRET = os.getenv("YOUTUBE_CLIENT_SECRET")
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"]
-REDIRECT_URI = "http://localhost:5000/auth/youtube/callback"
-
-flow = Flow.from_client_config(
-    {
-        "web": {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-        }
-    },
-    scopes=SCOPES,
-    redirect_uri=REDIRECT_URI,
-)
-
-@app.route("/auth/youtube/login")
-def youtube_login():
-
-    access_token = request.cookies.get('access_token')
     if not access_token:
-        return "Missing access token", 401
+        return jsonify({"error": "Access token is missing"}), 401
+
     try:
         decoded = jwt.decode(access_token, app.secret_key, algorithms=["HS256"])
+        user_id = decoded.get("id")
 
-        user_id = decoded["id"]
-        print(user_id)
+        if not user_id:
+            return jsonify({"error": "Invalid token"}), 401
 
-    except (e):
-        print(e)
+        channels = Channel.query.filter_by(user_id=user_id).all()
 
-    authorization_url, state = flow.authorization_url(
-        access_type="offline",  # Request a refresh token
-        include_granted_scopes="true",  # Use previously granted scopes
-        prompt="consent"
-    )
-    session["state"] = state  # Store the state token in the session
-    session["id"] = decoded["id"]
-    return redirect(authorization_url)
+        channels_data = {}
+        for channel in channels:
+            platform = channel.platform
+            if platform not in channels_data:
+                channels_data[platform] = []
+            channels_data[platform].append({
+                "channel_name": channel.channel_name,
+                "channel_id": channel.channel_id,
+            })
 
-@app.route("/auth/youtube/callback")
-def youtube_callback():
+        print(channels_data)
 
-    if "state" not in session or session["state"] != request.args.get("state"):
-        return "State mismatch", 400
-    try:
+        return jsonify({"message": "Channels fetched successfully", "channels": channels_data}), 200
 
-        flow.fetch_token(authorization_response=request.url)
-        credentials = flow.credentials
-
-        yt_access_token = credentials.token
-        yt_refresh_token = credentials.refresh_token
-
-        youtube = build("youtube", "v3", credentials=credentials)
-        response = youtube.channels().list(part="snippet", mine=True).execute()
-        print("\n\n\n\n\n\n")
-        print(yt_access_token)
-        print(yt_refresh_token)
-        print(response)
-
-        if "items" in response and len(response["items"]) > 0:
-            channel = response["items"][0]
-            channel_name = channel["snippet"]["title"]
-            channel_id = channel["id"]
-
-            user_id = session["id"]
-            if not user_id:
-                return "User not logged in", 401
-
-            user = User.query.filter_by(id=user_id).first()
-            if not user:
-                return "User not found", 404
-
-            # Save channel to database
-            new_channel = Channel(
-                user_id=user_id,
-                platform="YouTube",
-                access_token=yt_access_token,
-                refresh_token=yt_refresh_token,
-                channel_name=channel_name,
-                channel_id=channel_id,
-            )
-            db.session.add(new_channel)
-            db.session.commit()
-
-        return redirect("http://localhost:5173/#/addchannel/success")
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
     except Exception as e:
-        print(f"Error during token exchange: {e}")
-        return redirect("http://localhost:5173/#/addchannel/error")
+        print(f"Error: {e}")
+        return jsonify({"error": "An error occurred"}), 500
+
+
+@app.route("/<platform>/disconnect", methods=["POST", "OPTIONS"])
+def disconnect_platform(platform):
+    if request.method == "OPTIONS":
+        response = jsonify({"message": "Preflight check successful"})
+        response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+        return response, 200
+
+    access_token = request.cookies.get("access_token")
+
+    if not access_token:
+        return jsonify({"error": "Access token is missing"}), 401
+
+    try:
+        decoded = jwt.decode(access_token, app.secret_key, algorithms=["HS256"])
+        user_id = decoded.get("id")
+
+        if not user_id:
+            return jsonify({"error": "Invalid token"}), 401
+
+        data = request.get_json()
+        channel_id = data.get("channel_id")
+
+        if not channel_id:
+            return jsonify({"error": "Channel ID is required"}), 400
+
+        channel = Channel.query.filter_by(user_id=user_id, channel_id=channel_id).first()
+
+        if not channel:
+            return jsonify({"error": "Channel not found"}), 404
+
+        db.session.delete(channel)
+        db.session.commit()
+
+        return jsonify({"message": f"Successfully disconnected {channel.channel_name} from {platform}"}), 200
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": "An error occurred"}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -6,17 +6,21 @@ interface Props {
     children: ReactNode;
 }
 
-export const ProtectedRoute = ( { children } : Props ) => {
-    const { isLoggedIn } = useAuth();
+export const ProtectedRoute = ({ children }: Props) => {
+    const { isLoggedIn, isAuthInitializing } = useAuth();
+
+    if (isAuthInitializing) {
+        return;
+    }
 
     if (!isLoggedIn) {
         return <Navigate to="/" replace />;
     }
 
     return <>{children}</>;
-}
+};
 
-export const PublicRoute = ( { children } : Props ) => {
+export const PublicRoute = ({ children }: Props) => {
     const { isLoggedIn } = useAuth();
 
     if (isLoggedIn) {
@@ -24,4 +28,4 @@ export const PublicRoute = ( { children } : Props ) => {
     }
 
     return <>{children}</>;
-}
+};

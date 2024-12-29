@@ -13,11 +13,11 @@ import { useAuth } from "../context/AuthContext";
 import { ProtectedRoute, PublicRoute } from "./routes/Routes";
 import { AddChannelSuccess } from "../pages/AddChannelSuccess";
 import { AddChannelError } from "../pages/AddChannelError";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import apiClient from "../services/api-client";
 
 interface Props {
-    isLoggedIn: boolean
+    isLoggedIn: boolean;
 }
 
 const DefaultRoute = ( { isLoggedIn } : Props ) => {
@@ -30,7 +30,7 @@ function App() {
 
     const { isLoggedIn, setIsLoggedIn } = useAuth();
 
-    const refresh = async () => { // refresh the access token using refresh token
+    const refresh = useCallback(async () => {
         try {
             await apiClient.post("/auth/refresh");
             console.log("Access token refreshed");
@@ -38,11 +38,12 @@ function App() {
             console.log("Token refresh failed, logging out");
             setIsLoggedIn(false);
         }
-    }
+    }, [setIsLoggedIn]);
 
     useEffect(() => {
-        const validateAndRefreshSession = async () => {
+        let isRefreshing = false;
 
+        const validateAndRefreshSession = async () => {
             try {
                 const response = await apiClient.post("/auth/validate");
                 if (response.data.isValid) {
@@ -52,25 +53,31 @@ function App() {
                     console.log("User session invalid, redirecting to login");
                     setIsLoggedIn(false);
                 }
-
-                const interval = setInterval(async () => {
-                    refresh()
-                }, 10 * 60 * 1000); // 10 min
-
-                return () => clearInterval(interval);
             } catch (error: any) {
-                if (error.error_message === TOKEN_EXPIRED) {
-                    console.log("HELLO")
-                    refresh()
+                if (error?.response?.data?.error_message === TOKEN_EXPIRED) {
+                    console.log("Token expired, refreshing...");
+                    if (!isRefreshing) {
+                        isRefreshing = true;
+                        await refresh();
+                        isRefreshing = false;
+                    }
+                } else {
+                    console.error("Validation failed:", error);
+                    setIsLoggedIn(false);
                 }
-                console.error("Validation failed:", error);
-                setIsLoggedIn(false);
             }
         };
 
         validateAndRefreshSession();
-    }, [setIsLoggedIn]);
 
+        const interval = setInterval(() => {
+            if (!isRefreshing) {
+                refresh();
+            }
+        }, 10 * 60 * 1000); // 10 mins
+
+        return () => clearInterval(interval);
+    }, [refresh, setIsLoggedIn]);
     return (
 
             <HashRouter>

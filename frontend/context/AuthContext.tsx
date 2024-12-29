@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import apiClient from "../services/api-client";
 
 interface AuthContextType {
     isLoggedIn: boolean;
+    isAuthInitializing: boolean;
     setIsLoggedIn: (loggedIn: boolean) => void;
 }
 
@@ -11,11 +13,32 @@ interface AuthProviderProps {
     children: ReactNode;
 }
 
-export const AuthProvider = ({ children } : AuthProviderProps) => {
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // DEFAULT LOGIN STATE
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [isAuthInitializing, setIsAuthInitializing] = useState<boolean>(true);
+
+    useEffect(() => {
+        const initializeAuth = async () => {
+            try {
+                const response = await apiClient.post("/auth/validate");
+                if (response.data.isValid) {
+                    setIsLoggedIn(true);
+                } else {
+                    setIsLoggedIn(false);
+                }
+            } catch (error) {
+                console.error("Error during auth initialization:", error);
+                setIsLoggedIn(false);
+            } finally {
+                setIsAuthInitializing(false); // Initialization complete
+            }
+        };
+
+        initializeAuth();
+    }, []);
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+        <AuthContext.Provider value={{ isLoggedIn, isAuthInitializing, setIsLoggedIn }}>
             {children}
         </AuthContext.Provider>
     );
