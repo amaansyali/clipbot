@@ -5,16 +5,17 @@ import { Bell } from "../../src/Icons";
 
 import { useAuth } from "../../context/AuthContext";
 import { ROUTES } from "../../../shared/routes";
+import apiClient from "../../services/api-client";
 
 const NavBar = () => {
     const { isLoggedIn, setIsLoggedIn } = useAuth();
     console.log(isLoggedIn);
 
-    const  signOut = () => {
+    const  signOut = async () => {
         try {
-            localStorage.removeItem('authToken');
-            setIsLoggedIn(false)
+            await apiClient.post('/logout');
 
+            window.location.href = '/login'; // Redirect to login
         } catch (error) {
             console.error('Error during sign out:', error);
         }

@@ -23,10 +23,7 @@ const useLogin = () => {
             formData.append("password", loginInfo.password)
 
             setLoading(true)
-            const response = await apiClient.post("/login", formData, {});
-            const token = response.data.token
-
-            localStorage.setItem("authToken", token);
+            await apiClient.post("/login", formData, {});
 
             setIsLoggedIn(true)
         } catch (err: any) {

@@ -13,6 +13,8 @@ import { useAuth } from "../context/AuthContext";
 import { ProtectedRoute, PublicRoute } from "./routes/Routes";
 import { AddChannelSuccess } from "../pages/AddChannelSuccess";
 import { AddChannelError } from "../pages/AddChannelError";
+import { useEffect } from "react";
+import apiClient from "../services/api-client";
 
 interface Props {
     isLoggedIn: boolean
@@ -24,7 +26,50 @@ const DefaultRoute = ( { isLoggedIn } : Props ) => {
 };
 
 function App() {
-    const { isLoggedIn } = useAuth();
+    const TOKEN_EXPIRED = "TOKEN_EXPIRED"
+
+    const { isLoggedIn, setIsLoggedIn } = useAuth();
+
+    const refresh = async () => { // refresh the access token using refresh token
+        try {
+            await apiClient.post("/auth/refresh");
+            console.log("Access token refreshed");
+        } catch (error) {
+            console.log("Token refresh failed, logging out");
+            setIsLoggedIn(false);
+        }
+    }
+
+    useEffect(() => {
+        const validateAndRefreshSession = async () => {
+
+            try {
+                const response = await apiClient.post("/auth/validate");
+                if (response.data.isValid) {
+                    console.log("User is logged in");
+                    setIsLoggedIn(true);
+                } else {
+                    console.log("User session invalid, redirecting to login");
+                    setIsLoggedIn(false);
+                }
+
+                const interval = setInterval(async () => {
+                    refresh()
+                }, 10 * 60 * 1000); // 10 min
+
+                return () => clearInterval(interval);
+            } catch (error: any) {
+                if (error.error_message === TOKEN_EXPIRED) {
+                    console.log("HELLO")
+                    refresh()
+                }
+                console.error("Validation failed:", error);
+                setIsLoggedIn(false);
+            }
+        };
+
+        validateAndRefreshSession();
+    }, [setIsLoggedIn]);
 
     return (
 

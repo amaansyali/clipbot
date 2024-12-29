@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime, timedelta, timezone
 
-from flask import Flask, redirect, request, jsonify, session
+from flask import Flask, make_response, redirect, request, jsonify, session
 from flask_cors import CORS
 import bcrypt
 import jwt
@@ -16,16 +16,19 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}) #ensures only the frontend can make Cross Origin requests
-
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:5173"}}) #ensures only the frontend can make Cross Origin requests
 
 MEDIA_FOLDER_NAME = os.getenv("MEDIA_FOLDER_NAME")
 METADATA_FOLDER_NAME = os.getenv("METADATA_FOLDER_NAME")
+
+TOKEN_EXPIRED = "TOKEN_EXPIRED"
+TOKEN_INVALID = "TOKEN_INVALID"
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 app.secret_key = SECRET_KEY
 
+#DATABASE
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False # imrove performance
 
@@ -39,23 +42,88 @@ with app.app_context():
     except Exception as e:
         print(f"Error creating database tables: {e}")
 
-def upload():
+# ACCESS AND REFRESH TOKENS
+ACCESS_TOKEN_EXPIRES_MINUTES = 15
+REFRESH_TOKEN_EXPIRES_DAYS = 7
+
+def create_access_token(user_id, user_folder_id):
+    return jwt.encode(
+        {"id": user_id, "user_folder_id": user_folder_id, "exp": datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES)},
+        app.secret_key,
+        algorithm="HS256"
+    )
+
+def create_refresh_token(user_id, user_folder_id):
+    return jwt.encode(
+        {"id": user_id, "user_folder_id": user_folder_id, "exp": datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRES_DAYS)},
+        app.secret_key,
+        algorithm="HS256"
+    )
+
+def generate_access_and_refresh_response(user_id, user_folder_id):
+    access_token = create_access_token(user_id, user_folder_id)
+    refresh_token = create_refresh_token(user_id, user_folder_id)
+
+    response = make_response(jsonify({"message": "Logged in successfully"}))
+    response.set_cookie('access_token', access_token, httponly=True, secure=False, samesite='Strict', path='/') # secure = true in production
+    response.set_cookie('refresh_token', refresh_token, httponly=True, secure=False, samesite='Strict', path='/') # secure = true in production
+
+    return response
+
+@app.route('/auth/validate', methods=['POST'])
+def validate_token():
+
+    access_token = request.cookies.get('access_token')
+    print(access_token)
+
+    if not access_token:
+        return jsonify({"isValid": False}), 401
     try:
-        auth_header = request.headers.get("Authorization") # Extract the authorization token
-        if not auth_header or not auth_header.startswith("Bearer "):
-            return jsonify({"message": "Missing or invalid token"}), 401
+        decoded = jwt.decode(access_token, app.secret_key, algorithms=["HS256"])
+        return jsonify({"isValid": True, "user_id": decoded["id"]}), 200
+    except jwt.ExpiredSignatureError:
+        print("Access token expired")
+        return jsonify({"isValid": False, "message": "Access token expired", "error_message": TOKEN_EXPIRED}), 401
+    except jwt.InvalidTokenError:
+        print("Invalid token")
+        return jsonify({"isValid": False, "message": "Invalid token", "error_message": TOKEN_INVALID}), 401
 
-        token = auth_header.split(" ")[1] # Basically ["Bearer", "<token>"][1] = "<token>"
+@app.route('/auth/refresh', methods=['POST'])
+def refresh_token():
+    refresh_token = request.cookies.get('refresh_token')
+    if not refresh_token:
+        return jsonify({"message": "Missing refresh token"}), 401
 
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"]) # Decode the token
-        except jwt.ExpiredSignatureError:
-            return jsonify({"message": "Token has expired"}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({"message": "Invalid token"}), 401
+    try:
+        decoded = jwt.decode(refresh_token, app.secret_key, algorithms=["HS256"])
+        user_id = decoded["id"]
+        user_folder_id = decoded['user_folder_id']
 
-        user_email = payload["email"]
-        user_folder_id = payload["user_folder_id"]
+        # Generate a new access token
+        new_access_token = create_access_token(user_id, user_folder_id)
+
+        response = make_response(jsonify({"message": "Access token refreshed"}))
+        response.set_cookie('access_token', new_access_token, httponly=True, secure=False, samesite='Strict', path='/') # secure = true in production
+
+        return response
+    except jwt.ExpiredSignatureError:
+        return jsonify({"message": "Refresh token expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"message": "Invalid refresh token"}), 401
+
+
+@app.route('/upload', methods=['POST'])
+def upload():
+
+    access_token = request.cookies.get('access_token')
+
+    if not access_token:
+        return jsonify({"message": "Missing access token"}), 401
+
+    try:
+        decoded = jwt.decode(access_token, app.secret_key, algorithms=["HS256"])
+
+        user_folder_id = decoded['user_folder_id']
 
         title = request.form.get("title")
         description = request.form.get("description")
@@ -65,7 +133,7 @@ def upload():
         if not title or not description or not platforms or not video_file or not isinstance(platforms, list):
             return jsonify({"message": "Missing required fields or platforms isnt a list"}), 400
 
-        google_drive_utils.save_files_on_drive(title, description, platforms, video_file, user_email, user_folder_id) # later make sure files arent too big and have the proper format
+        google_drive_utils.save_files_on_drive(title, description, platforms, video_file, user_folder_id) # later make sure files arent too big and have the proper format
 
         return jsonify({"message": "File uploaded successfully"}), 200
     except:
@@ -91,15 +159,8 @@ def login_user():
         if not bcrypt.checkpw(password.encode("utf-8"), user.password.encode("utf-8")):
             return jsonify({"message": "Invalid email or password"}), 400
 
-        payload = {
-            "id": user.id,
-            "email": user.email,
-            "user_folder_id": user.user_folder_id,
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1)  # Token expires in 1 hour
-        }
-        token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+        return generate_access_and_refresh_response(user.id, user.user_folder_id) # 200 response
 
-        return jsonify({"message": "User logged in succesfully", "token": token}), 200
     except ProgrammingError as e:
         return jsonify({"message": "A database error occured"}), 500
     except Exception as e:
@@ -118,7 +179,6 @@ def sign_up_user():
         print(email)
         print(password)
 
-
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
             return jsonify({"message": "Email already in use"}), 400
@@ -133,20 +193,19 @@ def sign_up_user():
         db.session.add(new_user)
         db.session.commit()
 
-        payload = {
-            "id": new_user.id,
-            "email": email,
-            "user_folder_id": user_folder_id,
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1)  # Token expires in 1 hour
-        }
-        token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+        return generate_access_and_refresh_response(new_user.id, new_user.user_folder_id)
 
-        return jsonify({"message": "User signed up succesfully", "token": token}), 200
     except ProgrammingError as e:
         return jsonify({"message": "A database error occured"}), 500
     except Exception as e:
         return jsonify({"message": "A server error occured"}), 500
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    response = make_response(jsonify({"message": "Logged out successfully"}))
+    response.delete_cookie('access_token')
+    response.delete_cookie('refresh_token')
+    return response
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1" # REMOVE THIS !!!!! THIS ALLOWS OAUTH@ TO USE HTTP
 
@@ -154,7 +213,6 @@ CLIENT_ID = os.getenv("YOUTUBE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("YOUTUBE_CLIENT_SECRET")
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"]
 REDIRECT_URI = "http://localhost:5000/auth/youtube/callback"
-
 
 flow = Flow.from_client_config(
     {
@@ -169,24 +227,21 @@ flow = Flow.from_client_config(
     redirect_uri=REDIRECT_URI,
 )
 
-
 @app.route("/auth/youtube/login")
 def youtube_login():
 
+    access_token = request.cookies.get('access_token')
+    if not access_token:
+        return "Missing acess token", 401
 
-    token = request.cookies.get("token")
-    if not token:
-        return "Missing token", 401
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        user_id = payload["id"]
-        user_email = payload["email"]
+        decoded = jwt.decode(access_token, app.secret_key, algorithms=["HS256"])
+
+        user_id = decoded["id"]
         print(user_id)
-        print(user_email)
-        print("IVE DONE ITTTT")
+
     except (e):
         print(e)
-
 
     authorization_url, state = flow.authorization_url(
         access_type="offline",  # Request a refresh token
@@ -201,7 +256,6 @@ def youtube_callback():
     if "state" not in session or session["state"] != request.args.get("state"):
         return "State mismatch", 400
     try:
-        print("WE MADE ITTTT")
 
         flow.fetch_token(authorization_response=request.url)
         credentials = flow.credentials
@@ -220,7 +274,6 @@ def youtube_callback():
     except Exception as e:
         print(f"Error during token exchange: {e}")
         return redirect("http://localhost:5173/#/addchannel/error")
-
 
 if __name__ == "__main__":
     app.run(debug=True)

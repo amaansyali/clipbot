@@ -193,7 +193,7 @@ def delete_everything():
     except Exception as e:
         print(f"An error occurred: {e}")
 
-def save_files_on_drive(title, description, platforms, video_file, user_email, user_folder_id):
+def save_files_on_drive(title, description, platforms, video_file, user_folder_id):
 
     #UPLOAD TO MEDIA
     parent = user_folder_id
@@ -213,7 +213,6 @@ def save_files_on_drive(title, description, platforms, video_file, user_email, u
         "title": title,
         "description": description,
         "platforms": platforms,
-        "email": user_email # not really neccessary
     }
     json_data = json.dumps(data, indent=4)
 

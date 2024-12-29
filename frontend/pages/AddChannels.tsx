@@ -57,9 +57,7 @@ export function AddChannels() {
     };
 
     const handleAddYoutube = async () => {
-        document.cookie = `token=${localStorage.getItem("authToken")}; Path=/`;
         window.location.href = "http://localhost:5000/auth/youtube/login";
-
     };
 
     const handleDisconnectAccount = (
