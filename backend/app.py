@@ -207,6 +207,17 @@ def logout():
     response.delete_cookie('refresh_token')
     return response
 
+
+
+
+
+
+
+
+
+
+
+
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1" # REMOVE THIS !!!!! THIS ALLOWS OAUTH@ TO USE HTTP
 
 CLIENT_ID = os.getenv("YOUTUBE_CLIENT_ID")
@@ -232,8 +243,7 @@ def youtube_login():
 
     access_token = request.cookies.get('access_token')
     if not access_token:
-        return "Missing acess token", 401
-
+        return "Missing access token", 401
     try:
         decoded = jwt.decode(access_token, app.secret_key, algorithms=["HS256"])
 
@@ -245,9 +255,11 @@ def youtube_login():
 
     authorization_url, state = flow.authorization_url(
         access_type="offline",  # Request a refresh token
-        include_granted_scopes="true"  # Use previously granted scopes
+        include_granted_scopes="true",  # Use previously granted scopes
+        prompt="consent"
     )
     session["state"] = state  # Store the state token in the session
+    session["id"] = decoded["id"]
     return redirect(authorization_url)
 
 @app.route("/auth/youtube/callback")
@@ -260,15 +272,40 @@ def youtube_callback():
         flow.fetch_token(authorization_response=request.url)
         credentials = flow.credentials
 
-        access_token = credentials.token
-        refresh_token = credentials.refresh_token
+        yt_access_token = credentials.token
+        yt_refresh_token = credentials.refresh_token
 
         youtube = build("youtube", "v3", credentials=credentials)
         response = youtube.channels().list(part="snippet", mine=True).execute()
-
-        print(access_token)
-        print(refresh_token)
+        print("\n\n\n\n\n\n")
+        print(yt_access_token)
+        print(yt_refresh_token)
         print(response)
+
+        if "items" in response and len(response["items"]) > 0:
+            channel = response["items"][0]
+            channel_name = channel["snippet"]["title"]
+            channel_id = channel["id"]
+
+            user_id = session["id"]
+            if not user_id:
+                return "User not logged in", 401
+
+            user = User.query.filter_by(id=user_id).first()
+            if not user:
+                return "User not found", 404
+
+            # Save channel to database
+            new_channel = Channel(
+                user_id=user_id,
+                platform="YouTube",
+                access_token=yt_access_token,
+                refresh_token=yt_refresh_token,
+                channel_name=channel_name,
+                channel_id=channel_id,
+            )
+            db.session.add(new_channel)
+            db.session.commit()
 
         return redirect("http://localhost:5173/#/addchannel/success")
     except Exception as e:
