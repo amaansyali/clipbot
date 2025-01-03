@@ -10,7 +10,7 @@ import { NoPage } from "../pages/NoPage";
 
 import { useAuth } from "../context/AuthContext";
 
-import { ProtectedRoute, PublicRoute } from "./routes/Routes";
+import { ProtectedRoute, PublicRoute } from "../routes/Routes";
 import { AddChannelSuccess } from "../pages/AddChannelSuccess";
 import { AddChannelError } from "../pages/AddChannelError";
 import { useCallback, useEffect } from "react";
@@ -20,13 +20,12 @@ interface Props {
     isLoggedIn: boolean;
 }
 
-const DefaultRoute = ( { isLoggedIn } : Props ) => {
-
+const DefaultRoute = ({ isLoggedIn }: Props) => {
     return isLoggedIn ? <Dashboard /> : <Home />;
 };
 
 function App() {
-    const TOKEN_EXPIRED = "TOKEN_EXPIRED"
+    const TOKEN_EXPIRED = "TOKEN_EXPIRED";
 
     const { isLoggedIn, setIsLoggedIn } = useAuth();
 
@@ -79,67 +78,69 @@ function App() {
         return () => clearInterval(interval);
     }, [refresh, setIsLoggedIn]);
     return (
+        <HashRouter>
+            <Routes>
+                <Route path="*" element={<NoPage />} />
 
-            <HashRouter>
-                <Routes>
-                    <Route path="*" element={<NoPage />} />
+                <Route
+                    path="/"
+                    element={<DefaultRoute isLoggedIn={isLoggedIn} />}
+                />
 
-                    <Route path="/" element={<DefaultRoute isLoggedIn={isLoggedIn}/>} />
+                <Route
+                    path="/post"
+                    element={
+                        <ProtectedRoute>
+                            <CreatePost />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/addchannels"
+                    element={
+                        <ProtectedRoute>
+                            <AddChannels />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="/post"
-                        element={
-                            <ProtectedRoute>
-                                <CreatePost />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/addchannels"
-                        element={
-                            <ProtectedRoute>
-                                <AddChannels />
-                            </ProtectedRoute>
-                        }
-                    />
+                <Route
+                    path="/login"
+                    element={
+                        <PublicRoute>
+                            <Login />
+                        </PublicRoute>
+                    }
+                />
 
-                    <Route
-                        path="/login"
-                        element={
-                            <PublicRoute>
-                                <Login />
-                            </PublicRoute>
-                        }
-                    />
+                <Route
+                    path="/signup"
+                    element={
+                        <PublicRoute>
+                            <SignUp />
+                        </PublicRoute>
+                    }
+                />
 
-                    <Route
-                        path="/signup"
-                        element={
-                            <PublicRoute>
-                                <SignUp />
-                            </PublicRoute>
-                        }
-                    />
+                <Route
+                    path="/addchannel/success"
+                    element={
+                        <ProtectedRoute>
+                            <AddChannelSuccess />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="/addchannel/success"
-                        element={
-                            <ProtectedRoute>
-                                <AddChannelSuccess />
-                            </ProtectedRoute>
-                        }
-                    />
-
-                    <Route
-                        path="/addchannel/error"
-                        element={
-                            <ProtectedRoute>
-                                <AddChannelError />
-                            </ProtectedRoute>
-                        }
-                    />
-                </Routes>
-            </HashRouter>
+                <Route
+                    path="/addchannel/error"
+                    element={
+                        <ProtectedRoute>
+                            <AddChannelError />
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
+        </HashRouter>
     );
 }
 
