@@ -6,13 +6,17 @@ export interface Post {
     title: string;
     description: string;
     videoFile: File;
-    platforms: string[];
+    youtubeSelectedChannels: string[],
+    linkedinSelectedChannels: string[] | [],
+    instagramSelectedChannels: string[],
+    tiktokSelectedChannels: string[],
+    otherSelectedChannels: string[],
 }
 
 const useUpload = () => {
 
     const [uploadError, setUploadError] = useState< string | null>(null);
-    const [isLoading, setLoading] = useState(false)
+    const [isUploadLoading, setLoading] = useState(false)
 
     const uploadPost = async (postData: Post) => {
 
@@ -21,7 +25,11 @@ const useUpload = () => {
             formData.append("title", postData.title)
             formData.append("description", postData.description)
             formData.append("videoFile", postData.videoFile)
-            formData.append("platforms", JSON.stringify(postData.platforms))
+            formData.append("youtubeSelectedChannels", JSON.stringify(postData.youtubeSelectedChannels))
+            formData.append("linkedinSelectedChannels", JSON.stringify(postData.linkedinSelectedChannels))
+            formData.append("instagramSelectedChannels", JSON.stringify(postData.instagramSelectedChannels))
+            formData.append("tiktokSelectedChannels", JSON.stringify(postData.tiktokSelectedChannels))
+            formData.append("otherSelectedChannels", JSON.stringify(postData.otherSelectedChannels))
 
             setLoading(true)
             const response = await apiClient.post("/upload", formData, {});
@@ -30,13 +38,13 @@ const useUpload = () => {
         } catch (err: any) {
             if (err instanceof CanceledError) return;
             console.log(err)
-            setUploadError(err.message)
+            setUploadError(err.response.data.message)
         } finally {
             setLoading(false)
         }
     }
 
-    return { uploadPost, isLoading, uploadError };
+    return { uploadPost, isUploadLoading, uploadError };
 }
 
 export default useUpload

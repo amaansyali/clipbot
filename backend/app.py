@@ -117,7 +117,6 @@ def refresh_token():
 
 @app.route('/upload', methods=['POST'])
 def upload():
-
     access_token = request.cookies.get('access_token')
 
     if not access_token:
@@ -130,13 +129,18 @@ def upload():
 
         title = request.form.get("title")
         description = request.form.get("description")
-        platforms = json.loads(request.form.get("platforms"))
         video_file = request.files.get("videoFile")
 
-        if not title or not description or not platforms or not video_file or not isinstance(platforms, list):
-            return jsonify({"message": "Missing required fields or platforms isnt a list"}), 400
+        youtubeSelectedChannels = json.loads(request.form.get("youtubeSelectedChannels"))
+        linkedinSelectedChannels = json.loads(request.form.get("linkedinSelectedChannels"))
+        instagramSelectedChannels = json.loads(request.form.get("instagramSelectedChannels"))
+        tiktokSelectedChannels = json.loads(request.form.get("tiktokSelectedChannels"))
+        otherSelectedChannels = json.loads(request.form.get("otherSelectedChannels"))
 
-        google_drive_utils.save_files_on_drive(title, description, platforms, video_file, user_folder_id) # later make sure files arent too big and have the proper format
+        if not title or not description or not (youtubeSelectedChannels or linkedinSelectedChannels or instagramSelectedChannels or tiktokSelectedChannels):
+            return jsonify({"message": "Missing a channel or channels to post to."}), 400
+
+        # google_drive_utils.save_files_on_drive(title, description, platforms, video_file, user_folder_id) # later make sure files arent too big and have the proper format
 
         return jsonify({"message": "File uploaded successfully"}), 200
     except:
@@ -296,7 +300,6 @@ def disconnect_platform(platform):
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({"error": "An error occurred"}), 500
-
 
 if __name__ == "__main__":
     app.run(debug=True)

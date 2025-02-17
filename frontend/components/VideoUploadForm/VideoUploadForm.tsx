@@ -5,23 +5,35 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import VideoUpload from "./VideoUpload";
+import ChannelSelector from "./ChannelSelector";
+
 import useUpload from "../../hooks/useUpload";
 
 import { Post } from "../../hooks/useUpload";
+import { useFetchChannels } from "../../hooks/useFetchChannels";
 
 const schema = z.object({
     title: z.string().min(1, { message: "Title cannot be empty" }),
     description: z.string().max(2200, {
         message: "Description cannot be more than 2,200 characters",
     }),
+
+    youtubeSelectedChannels: z.array(z.string()).default([]),
+    linkedinSelectedChannels: z.array(z.string()).default([]),
+    instagramSelectedChannels: z.array(z.string()).default([]),
+    tiktokSelectedChannels: z.array(z.string()).default([]),
+    otherSelectedChannels: z.array(z.string()).default([]),
 });
 
 type FormData = z.infer<typeof schema>;
 
-let isVideoMissing = false;
-
 const VideoUploadForm = () => {
-    const { uploadPost, isLoading, uploadError } = useUpload();
+    const [isVideoMissing, setIsVideoMissing] = useState(false);
+
+    const { uploadPost, isUploadLoading, uploadError } = useUpload();
+
+    const { connectedChannels, isFetchChannelsLoading, fetchChannelsError } =
+        useFetchChannels();
 
     const [videoFile, setVideoFile] = useState<File | null>(null);
 
@@ -30,17 +42,22 @@ const VideoUploadForm = () => {
     };
 
     const onSubmit = async (data: FormData) => {
+
         if (!videoFile) {
-            isVideoMissing = true;
+            setIsVideoMissing(true);
+            return;
         } else {
-            reset();
-            isVideoMissing = false;
+            setIsVideoMissing(false);
 
             const postData: Post = {
                 title: data.title,
                 description: data.description,
                 videoFile: videoFile,
-                platforms: ["youtube", "linkedin", "instagram", "tiktok"], // will make user pick this later
+                youtubeSelectedChannels: data.youtubeSelectedChannels,
+                linkedinSelectedChannels: data.linkedinSelectedChannels,
+                instagramSelectedChannels: data.instagramSelectedChannels,
+                tiktokSelectedChannels: data.tiktokSelectedChannels,
+                otherSelectedChannels: data.otherSelectedChannels,
             };
 
             try {
@@ -48,6 +65,8 @@ const VideoUploadForm = () => {
             } catch {
                 console.log("Upload failed:", uploadError);
             }
+
+            reset();
         }
     };
 
@@ -102,7 +121,7 @@ const VideoUploadForm = () => {
                 </div>
 
                 {/* Description */}
-                <div className="col-span-full">
+                <div className="col-span-full mb-4">
                     <label
                         htmlFor="description"
                         className="block text-sm/6 font-medium text-dark"
@@ -126,6 +145,12 @@ const VideoUploadForm = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Channel Selector */}
+                <ChannelSelector
+                    register={register}
+                    connectedChannels={connectedChannels}
+                />
 
                 {/* Cancel Save */}
                 <div className="mt-6 flex items-center justify-end gap-x-6">
