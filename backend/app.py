@@ -131,14 +131,14 @@ def upload():
         description = request.form.get("description")
         video_file = request.files.get("videoFile")
 
-        youtubeSelectedChannels = request.form.get("youtubeSelectedChannels")
-        linkedinSelectedChannels = request.form.get("linkedinSelectedChannels")
-        instagramSelectedChannels = request.form.get("instagramSelectedChannels")
-        tiktokSelectedChannels = request.form.get("tiktokSelectedChannels")
-        otherSelectedChannels = request.form.get("otherSelectedChannels")
+        youtubeSelectedChannels = json.loads(request.form.get("youtubeSelectedChannels"))
+        linkedinSelectedChannels = json.loads(request.form.get("linkedinSelectedChannels"))
+        instagramSelectedChannels = json.loads(request.form.get("instagramSelectedChannels"))
+        tiktokSelectedChannels = json.loads(request.form.get("tiktokSelectedChannels"))
+        otherSelectedChannels = json.loads(request.form.get("otherSelectedChannels"))
 
-        if not title or not description:
-            return jsonify({"message": "Missing required fields or platforms isnt a list"}), 400
+        if not title or not description or not (youtubeSelectedChannels or linkedinSelectedChannels or instagramSelectedChannels or tiktokSelectedChannels):
+            return jsonify({"message": "Missing a channel or channels to post to."}), 400
 
         # google_drive_utils.save_files_on_drive(title, description, platforms, video_file, user_folder_id) # later make sure files arent too big and have the proper format
 

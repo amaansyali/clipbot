@@ -38,7 +38,7 @@ const useUpload = () => {
         } catch (err: any) {
             if (err instanceof CanceledError) return;
             console.log(err)
-            setUploadError(err.message)
+            setUploadError(err.response.data.message)
         } finally {
             setLoading(false)
         }
