@@ -129,10 +129,15 @@ def upload():
 
         title = request.form.get("title")
         description = request.form.get("description")
-        platforms = json.loads(request.form.get("platforms"))
         video_file = request.files.get("videoFile")
 
-        if not title or not description or not platforms or not video_file or not isinstance(platforms, list):
+        youtubeSelectedChannels = request.form.get("youtubeSelectedChannels")
+        linkedinSelectedChannels = request.form.get("linkedinSelectedChannels")
+        instagramSelectedChannels = request.form.get("instagramSelectedChannels")
+        tiktokSelectedChannels = request.form.get("tiktokSelectedChannels")
+        otherSelectedChannels = request.form.get("otherSelectedChannels")
+
+        if not title or not description:
             return jsonify({"message": "Missing required fields or platforms isnt a list"}), 400
 
         # google_drive_utils.save_files_on_drive(title, description, platforms, video_file, user_folder_id) # later make sure files arent too big and have the proper format

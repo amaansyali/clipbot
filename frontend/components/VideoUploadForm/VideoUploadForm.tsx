@@ -17,15 +17,19 @@ const schema = z.object({
     description: z.string().max(2200, {
         message: "Description cannot be more than 2,200 characters",
     }),
-    selectedChannels: z
-        .array(z.string()),
+
+    youtubeSelectedChannels: z.array(z.string()).default([]),
+    linkedinSelectedChannels: z.array(z.string()).default([]),
+    instagramSelectedChannels: z.array(z.string()).default([]),
+    tiktokSelectedChannels: z.array(z.string()).default([]),
+    otherSelectedChannels: z.array(z.string()).default([]),
 });
 
 type FormData = z.infer<typeof schema>;
 
-let isVideoMissing = false;
-
 const VideoUploadForm = () => {
+    const [isVideoMissing, setIsVideoMissing] = useState(false);
+
     const { uploadPost, isUploadLoading, uploadError } = useUpload();
 
     const { connectedChannels, isFetchChannelsLoading, fetchChannelsError } =
@@ -38,21 +42,22 @@ const VideoUploadForm = () => {
     };
 
     const onSubmit = async (data: FormData) => {
-        console.log("HELLo");
 
         if (!videoFile) {
-            isVideoMissing = true;
+            setIsVideoMissing(true);
+            return;
         } else {
-            reset();
-            isVideoMissing = false;
-
-            console.log(data.selectedChannels);
+            setIsVideoMissing(false);
 
             const postData: Post = {
                 title: data.title,
                 description: data.description,
                 videoFile: videoFile,
-                platforms: ["youtube", "linkedin", "instagram", "tiktok"], // will make user pick this later
+                youtubeSelectedChannels: data.youtubeSelectedChannels,
+                linkedinSelectedChannels: data.linkedinSelectedChannels,
+                instagramSelectedChannels: data.instagramSelectedChannels,
+                tiktokSelectedChannels: data.tiktokSelectedChannels,
+                otherSelectedChannels: data.otherSelectedChannels,
             };
 
             try {
@@ -60,6 +65,8 @@ const VideoUploadForm = () => {
             } catch {
                 console.log("Upload failed:", uploadError);
             }
+
+            reset();
         }
     };
 

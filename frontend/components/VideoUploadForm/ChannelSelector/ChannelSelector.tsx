@@ -7,7 +7,11 @@ interface ChannelSelectorProps {
     register: UseFormRegister<{
         title: string;
         description: string;
-        selectedChannels: string[];
+        youtubeSelectedChannels: string[];
+        linkedinSelectedChannels: string[];
+        instagramSelectedChannels: string[];
+        tiktokSelectedChannels: string[];
+        otherSelectedChannels: string[];
     }>;
     connectedChannels: ConnectedChannels | null;
 }
@@ -16,6 +20,20 @@ const ChannelSelector = ({
     register,
     connectedChannels,
 }: ChannelSelectorProps) => {
+    
+    const platformFunnel = (platform: string) => {
+        if (platform === "youtube") {
+            return "youtubeSelectedChannels";
+        } else if (platform === "linkedin") {
+            return "linkedinSelectedChannels";
+        } else if (platform === "instagram") {
+            return "instagramSelectedChannels";
+        } else if (platform === "tiktok") {
+            return "tiktokSelectedChannels";
+        }
+        return "otherSelectedChannels";
+    };
+
     return (
         <>
             {connectedChannels &&
@@ -37,20 +55,22 @@ const ChannelSelector = ({
                                                         <div className="group grid size-4 grid-cols-1">
                                                             <input
                                                                 defaultChecked
-                                                                id="comments"
-                                                                name="comments"
                                                                 type="checkbox"
-                                                                aria-describedby="comments-description"
                                                                 className="col-start-1 row-start-1 appearance-none rounded-sm border border-medium-light checked:border-primary-main checked:bg-primary-main indeterminate:border-primary-main indeterminate:bg-primary-main focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-main disabled:border-light disabled:bg-light disabled:checked:bg-light forced-colors:appearance-auto"
+                                                                value={
+                                                                    channel.channel_id
+                                                                }
+                                                                {...register(
+                                                                    platformFunnel(
+                                                                        platform
+                                                                    )
+                                                                )}
                                                             />
                                                             <Check />
                                                         </div>
                                                     </div>
                                                     <div className="text-sm/6">
-                                                        <label
-                                                            htmlFor="comments"
-                                                            className="font-medium text-dark"
-                                                        >
+                                                        <label className="font-medium text-dark">
                                                             {
                                                                 channel.channel_name
                                                             }
