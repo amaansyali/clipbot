@@ -6,44 +6,14 @@ import NavBar from "../components/NavBar";
 import { NewPostIcon, AddChannelsIcon } from "../src/Icons";
 import { ROUTES } from "../../shared/routes";
 import apiClient from "../services/api-client";
+import { Channel, ConnectedChannels, useFetchChannels } from "../hooks/useFetchChannels";
 
-interface Channel {
-    channel_name: string;
-    channel_id: string;
-}
 
-interface ConnectedChannels {
-    youtube: Channel[];
-    linkedin: Channel[];
-    instagram: Channel[];
-    tiktok: Channel[];
-}
 
 export function AddChannels() {
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-    const [channels, setChannels] = useState<ConnectedChannels | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [fetchChannelsError, setFetchChannelsError] = useState<string | null>(
-        null
-    );
 
-    useEffect(() => {
-        const fetchChannels = async () => {
-            try {
-                setIsLoading(true);
-                const response = await apiClient.get("/fetchchannels");
-                console.log(response.data.channels);
-                setChannels(response.data.channels);
-            } catch (error) {
-                console.error("Error fetching channels:", error);
-                setFetchChannelsError("Failed to fetch channels");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchChannels();
-    }, []);
+    const { connectedChannels, isFetchChannelsLoading, fetchChannelsError } = useFetchChannels();
 
     const handleChangeSideBar = (): void => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -91,8 +61,18 @@ export function AddChannels() {
         platform: keyof ConnectedChannels;
         channels: ConnectedChannels | null;
     }) => {
-        if (isLoading) return <span className="font-medium text-xs text-dark">Loading...</span>;
-        if (fetchChannelsError) return <span className="font-medium text-xs text-red-main">Error: {fetchChannelsError}</span>;
+        if (isFetchChannelsLoading)
+            return (
+                <span className="font-medium text-xs text-dark">
+                    Loading...
+                </span>
+            );
+        if (fetchChannelsError)
+            return (
+                <span className="font-medium text-xs text-red-main">
+                    Error: {fetchChannelsError}
+                </span>
+            );
         if (
             !channels ||
             !channels[platform] ||
@@ -185,7 +165,7 @@ export function AddChannels() {
                                 </button>
                                 <RenderConnectedAccounts
                                     platform="youtube"
-                                    channels={channels}
+                                    channels={connectedChannels}
                                 />
                             </div>
 
@@ -200,7 +180,7 @@ export function AddChannels() {
                                 </button>
                                 <RenderConnectedAccounts
                                     platform="linkedin"
-                                    channels={channels}
+                                    channels={connectedChannels}
                                 />
                             </div>
 
@@ -215,7 +195,7 @@ export function AddChannels() {
                                 </button>
                                 <RenderConnectedAccounts
                                     platform="instagram"
-                                    channels={channels}
+                                    channels={connectedChannels}
                                 />
                             </div>
 
@@ -230,7 +210,7 @@ export function AddChannels() {
                                 </button>
                                 <RenderConnectedAccounts
                                     platform="tiktok"
-                                    channels={channels}
+                                    channels={connectedChannels}
                                 />
                             </div>
                         </div>

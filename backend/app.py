@@ -117,7 +117,6 @@ def refresh_token():
 
 @app.route('/upload', methods=['POST'])
 def upload():
-
     access_token = request.cookies.get('access_token')
 
     if not access_token:
@@ -136,7 +135,7 @@ def upload():
         if not title or not description or not platforms or not video_file or not isinstance(platforms, list):
             return jsonify({"message": "Missing required fields or platforms isnt a list"}), 400
 
-        google_drive_utils.save_files_on_drive(title, description, platforms, video_file, user_folder_id) # later make sure files arent too big and have the proper format
+        # google_drive_utils.save_files_on_drive(title, description, platforms, video_file, user_folder_id) # later make sure files arent too big and have the proper format
 
         return jsonify({"message": "File uploaded successfully"}), 200
     except:
@@ -296,7 +295,6 @@ def disconnect_platform(platform):
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({"error": "An error occurred"}), 500
-
 
 if __name__ == "__main__":
     app.run(debug=True)

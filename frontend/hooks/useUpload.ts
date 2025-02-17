@@ -12,7 +12,7 @@ export interface Post {
 const useUpload = () => {
 
     const [uploadError, setUploadError] = useState< string | null>(null);
-    const [isLoading, setLoading] = useState(false)
+    const [isUploadLoading, setLoading] = useState(false)
 
     const uploadPost = async (postData: Post) => {
 
@@ -36,7 +36,7 @@ const useUpload = () => {
         }
     }
 
-    return { uploadPost, isLoading, uploadError };
+    return { uploadPost, isUploadLoading, uploadError };
 }
 
 export default useUpload
